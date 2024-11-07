@@ -2,19 +2,19 @@ package token
 
 import "strings"
 
-//Token ...
+// Token ...
 type Token int
 
 //go:generate stringer -type=Token
 const (
-	// Special tokens
+	// Special tokens.
 	ILLEGAL Token = iota
 	EOF
 	COMMENT
 
 	_literalBeg
 	// Identifiers and basic type literals
-	// (these tokens stand for classes of literals)
+	// (these tokens stand for classes of literals).
 	IDENT   // main
 	INT     // 12345
 	FLOAT   // 123.45
@@ -82,7 +82,7 @@ const (
 	_miscEnd
 )
 
-// Tokens map to string
+// Tokens map to string.
 var Tokens = [...]string{
 	ILLEGAL: "ILLEGAL",
 
@@ -151,7 +151,7 @@ func init() {
 	}
 }
 
-// Lookup find token with a name
+// Lookup find token with a name.
 func Lookup(ident string) Token {
 	if tok, ok := keywords[strings.ToUpper(ident)]; ok {
 		return tok

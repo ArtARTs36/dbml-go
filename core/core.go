@@ -2,7 +2,7 @@ package core
 
 import "github.com/artarts36/dbml-go/token"
 
-// DBML structure
+// DBML structure.
 type DBML struct {
 	Project     Project
 	Tables      []Table
@@ -67,13 +67,13 @@ type IndexSetting struct {
 type RelationshipType int
 
 const (
-	// None relationship
+	// None relationship.
 	None = iota
-	// OneToOne 1 - 1
+	// OneToOne 1 - 1.
 	OneToOne
-	// OneToMany 1 - n
+	// OneToMany 1 - n.
 	OneToMany
-	// ManyToOne n - 1
+	// ManyToOne n - 1.
 	ManyToOne
 )
 

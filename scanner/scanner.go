@@ -25,7 +25,7 @@ func NewScanner(r io.Reader) *Scanner {
 	return s
 }
 
-// Next return next token and literal value
+// Next return next token and literal value.
 func (s *Scanner) Read() (tok token.Token, lit string) {
 	for isWhitespace(s.ch) {
 		s.next()
@@ -202,7 +202,7 @@ func (s *Scanner) next() {
 	s.ch = ch
 }
 
-// LineInfo return line info
+// LineInfo return line info.
 func (s *Scanner) LineInfo() (uint, uint) {
 	return s.l, s.c
 }

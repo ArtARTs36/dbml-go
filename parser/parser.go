@@ -12,7 +12,7 @@ import (
 	"github.com/artarts36/dbml-go/token"
 )
 
-// Parser declaration
+// Parser declaration.
 type Parser struct {
 	s *scanner.Scanner
 
@@ -425,6 +425,41 @@ func (p *Parser) parseColumn(name string) (*core.Column, error) {
 	return column, nil
 }
 
+func (p *Parser) parseColumnDefault() (*core.ColumnDefault, error) {
+	colDef := &core.ColumnDefault{
+		Raw:   p.lit,
+		Value: p.lit,
+		Type:  core.ColumnDefaultTypeUnknown,
+	}
+
+	switch p.token {
+	case token.STRING, token.DSTRING:
+		colDef.Type = core.ColumnDefaultTypeString
+	case token.INT:
+		intVal, err := strconv.Atoi(p.lit)
+		if err != nil {
+			return nil, p.expect(fmt.Sprintf("default int value: %s", err.Error()))
+		}
+
+		colDef.Value = intVal
+		colDef.Type = core.ColumnDefaultTypeNumber
+	case token.FLOAT:
+		floatVal, err := strconv.ParseFloat(p.lit, 4)
+		if err != nil {
+			return nil, p.expect(fmt.Sprintf("default float value: %s", err.Error()))
+		}
+
+		colDef.Value = floatVal
+		colDef.Type = core.ColumnDefaultTypeNumber
+	case token.EXPR:
+		colDef.Type = core.ColumnDefaultTypeExpression
+	default:
+		return nil, p.expect("default value")
+	}
+
+	return colDef, nil
+}
+
 func (p *Parser) parseColumnSettings() (*core.ColumnSetting, error) {
 	columnSetting := &core.ColumnSetting{}
 	commaAllowed := false
@@ -472,44 +507,13 @@ func (p *Parser) parseColumnSettings() (*core.ColumnSetting, error) {
 			}
 
 			p.next()
-			switch p.token {
-			case token.STRING, token.DSTRING:
-				columnSetting.Default = core.ColumnDefault{
-					Raw:   p.lit,
-					Value: p.lit,
-					Type:  core.ColumnDefaultTypeString,
-				}
-			case token.INT:
-				intVal, err := strconv.Atoi(p.lit)
-				if err != nil {
-					return nil, p.expect(fmt.Sprintf("default int value: %s", err.Error()))
-				}
 
-				columnSetting.Default = core.ColumnDefault{
-					Raw:   p.lit,
-					Value: intVal,
-					Type:  core.ColumnDefaultTypeNumber,
-				}
-			case token.FLOAT:
-				floatVal, err := strconv.ParseFloat(p.lit, 4)
-				if err != nil {
-					return nil, p.expect(fmt.Sprintf("default float value: %s", err.Error()))
-				}
-
-				columnSetting.Default = core.ColumnDefault{
-					Raw:   p.lit,
-					Value: floatVal,
-					Type:  core.ColumnDefaultTypeNumber,
-				}
-			case token.EXPR:
-				columnSetting.Default = core.ColumnDefault{
-					Raw:   p.lit,
-					Value: p.lit,
-					Type:  core.ColumnDefaultTypeExpression,
-				}
-			default:
-				return nil, p.expect("default value")
+			def, err := p.parseColumnDefault()
+			if err != nil {
+				return nil, err
 			}
+
+			columnSetting.Default = *def
 		case token.NOTE:
 			str, err := p.parseDescription()
 			if err != nil {
