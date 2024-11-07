@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"regexp"
+	"strconv"
 	"strings"
 
 	"github.com/artarts36/dbml-go/core"
@@ -469,13 +470,43 @@ func (p *Parser) parseColumnSettings() (*core.ColumnSetting, error) {
 			if p.token != token.COLON {
 				return nil, p.expect(":")
 			}
+
 			p.next()
 			switch p.token {
-			case token.STRING, token.DSTRING, token.TSTRING, token.INT, token.FLOAT, token.EXPR:
-				// TODO:
-				//	* handle default value by expr
-				//	* validate default value by type
-				columnSetting.Default = p.lit
+			case token.STRING, token.DSTRING:
+				columnSetting.Default = core.ColumnDefault{
+					Raw:   p.lit,
+					Value: p.lit,
+					Type:  core.ColumnDefaultTypeString,
+				}
+			case token.INT:
+				intVal, err := strconv.Atoi(p.lit)
+				if err != nil {
+					return nil, p.expect(fmt.Sprintf("default int value: %s", err.Error()))
+				}
+
+				columnSetting.Default = core.ColumnDefault{
+					Raw:   p.lit,
+					Value: intVal,
+					Type:  core.ColumnDefaultTypeNumber,
+				}
+			case token.FLOAT:
+				floatVal, err := strconv.ParseFloat(p.lit, 4)
+				if err != nil {
+					return nil, p.expect(fmt.Sprintf("default float value: %s", err.Error()))
+				}
+
+				columnSetting.Default = core.ColumnDefault{
+					Raw:   p.lit,
+					Value: floatVal,
+					Type:  core.ColumnDefaultTypeNumber,
+				}
+			case token.EXPR:
+				columnSetting.Default = core.ColumnDefault{
+					Raw:   p.lit,
+					Value: p.lit,
+					Type:  core.ColumnDefaultTypeExpression,
+				}
 			default:
 				return nil, p.expect("default value")
 			}

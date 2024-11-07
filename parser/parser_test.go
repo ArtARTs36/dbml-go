@@ -1,6 +1,9 @@
 package parser
 
 import (
+	"github.com/artarts36/dbml-go/core"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"strings"
 	"testing"
 
@@ -152,5 +155,98 @@ func TestAllowKeywordsAsEnum(t *testing.T) {
 
 	if enum.Values[0].Name != "key" {
 		t.Fatalf("enum value should be 'key'")
+	}
+}
+
+func TestParser_Parse_Column_Settings_Default(t *testing.T) {
+
+	cases := []struct {
+		Title    string
+		Spec     string
+		Expected core.ColumnDefault
+	}{
+		{
+			Title: "parse string value with single quotes",
+			Spec: `
+	Table user {
+		name varchar [default: 'test']
+	}
+`,
+			Expected: core.ColumnDefault{
+				Type:  core.ColumnDefaultTypeString,
+				Raw:   "test",
+				Value: "test",
+			},
+		},
+		{
+			Title: "parse string value with double quotes",
+			Spec: `
+	Table user {
+		name varchar [default: "test"]
+	}
+`,
+			Expected: core.ColumnDefault{
+				Type:  core.ColumnDefaultTypeString,
+				Raw:   "test",
+				Value: "test",
+			},
+		},
+		{
+			Title: "parse int value",
+			Spec: `
+	Table user {
+		name varchar [default: 123]
+	}
+`,
+			Expected: core.ColumnDefault{
+				Type:  core.ColumnDefaultTypeNumber,
+				Raw:   "123",
+				Value: 123,
+			},
+		},
+		{
+			Title: "parse int value",
+			Spec: `
+	Table user {
+		name varchar [default: 123]
+	}
+`,
+			Expected: core.ColumnDefault{
+				Type:  core.ColumnDefaultTypeNumber,
+				Raw:   "123",
+				Value: 123,
+			},
+		},
+		{
+			Title: "parse float value",
+			Spec: `
+	Table user {
+		name varchar [default: 123.456]
+	}
+`,
+			Expected: core.ColumnDefault{
+				Type:  core.ColumnDefaultTypeNumber,
+				Raw:   "123.456",
+				Value: 123.456,
+			},
+		},
+		{
+			Title: "parse expression value",
+			Spec:  "Table user { name varchar [default: `now()`]}",
+			Expected: core.ColumnDefault{
+				Type:  core.ColumnDefaultTypeExpression,
+				Raw:   "now()",
+				Value: "now()",
+			},
+		},
+	}
+
+	for _, tCase := range cases {
+		t.Run(tCase.Title, func(t *testing.T) {
+			dbml, err := p(tCase.Spec).Parse()
+			require.NoError(t, err)
+
+			assert.Equal(t, tCase.Expected, dbml.Tables[0].Columns[0].Settings.Default)
+		})
 	}
 }

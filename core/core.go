@@ -39,7 +39,7 @@ type ColumnSetting struct {
 	Note      string
 	PK        bool
 	Unique    bool
-	Default   string
+	Default   ColumnDefault
 	Null      bool
 	Increment bool
 	Ref       struct {
