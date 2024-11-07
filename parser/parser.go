@@ -6,9 +6,9 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/duythinht/dbml-go/core"
-	"github.com/duythinht/dbml-go/scanner"
-	"github.com/duythinht/dbml-go/token"
+	"github.com/artarts36/dbml-go/core"
+	"github.com/artarts36/dbml-go/scanner"
+	"github.com/artarts36/dbml-go/token"
 )
 
 // Parser declaration
@@ -227,7 +227,7 @@ func (p *Parser) parseTable() (*core.Table, error) {
 	p.next()
 	switch p.token {
 	case token.IDENT, token.DSTRING:
-		//pass
+		// pass
 	default:
 		if m, _ := regexp.MatchString("^[a-zA-Z1-9]+$", p.lit); !m {
 			return nil, fmt.Errorf("table name is invalid: %s", p.lit)
@@ -411,7 +411,7 @@ func (p *Parser) parseColumn(name string) (*core.Column, error) {
 		}
 		fallthrough
 	case token.LBRACK:
-		//handle parseColumn
+		// handle parseColumn
 		columnSetting, err := p.parseColumnSettings()
 		if err != nil {
 			return nil, fmt.Errorf("parse column settings: %w", err)
@@ -425,7 +425,7 @@ func (p *Parser) parseColumn(name string) (*core.Column, error) {
 }
 
 func (p *Parser) parseColumnSettings() (*core.ColumnSetting, error) {
-	columnSetting := &core.ColumnSetting{Null: true}
+	columnSetting := &core.ColumnSetting{}
 	commaAllowed := false
 
 	for {
@@ -472,7 +472,7 @@ func (p *Parser) parseColumnSettings() (*core.ColumnSetting, error) {
 			p.next()
 			switch p.token {
 			case token.STRING, token.DSTRING, token.TSTRING, token.INT, token.FLOAT, token.EXPR:
-				//TODO:
+				// TODO:
 				//	* handle default value by expr
 				//	* validate default value by type
 				columnSetting.Default = p.lit
@@ -560,7 +560,7 @@ func (p *Parser) parseDescription() (string, error) {
 func (p *Parser) next() {
 	for {
 		p.token, p.lit = p.s.Read()
-		//p.debug("token:", p.token.String(), "lit:", p.lit)
+		// p.debug("token:", p.token.String(), "lit:", p.lit)
 		if p.token != token.COMMENT {
 			break
 		}

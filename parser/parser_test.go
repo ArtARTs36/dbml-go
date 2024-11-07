@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/duythinht/dbml-go/scanner"
+	"github.com/artarts36/dbml-go/scanner"
 )
 
 func p(str string) *Parser {
@@ -102,7 +102,7 @@ func TestParseTableWithNoteColumn(t *testing.T) {
 	`)
 	dbml, err := parser.Parse()
 
-	//t.Log(err)
+	// t.Log(err)
 	if err != nil {
 		t.Fatalf("%v", err)
 	}
@@ -121,7 +121,7 @@ func TestAllowKeywordsAsTable(t *testing.T) {
 	`)
 	dbml, err := parser.Parse()
 
-	//t.Log(err)
+	// t.Log(err)
 	if err != nil {
 		t.Fatalf("%v", err)
 	}
@@ -140,7 +140,7 @@ func TestAllowKeywordsAsEnum(t *testing.T) {
 	`)
 	dbml, err := parser.Parse()
 
-	//t.Log(err)
+	// t.Log(err)
 	if err != nil {
 		t.Fatalf("%v", err)
 	}
