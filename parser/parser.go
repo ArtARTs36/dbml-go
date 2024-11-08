@@ -263,6 +263,15 @@ func (p *Parser) parseTable(ctx context.Context) (*core.Table, error) {
 		}
 		p.next()
 		fallthrough
+	case token.LBRACK:
+		// handle parseColumn
+		tableSetting, err := p.parseTableSettings()
+		if err != nil {
+			return nil, fmt.Errorf("parse table settings: %w", err)
+		}
+		p.next() // remove ']'
+		table.Settings = *tableSetting
+		fallthrough
 	case token.LBRACE:
 		p.next()
 		for {
@@ -621,7 +630,7 @@ func (p *Parser) next() {
 
 func (p *Parser) expect(expected string) error {
 	l, c := p.s.LineInfo()
-	return fmt.Errorf("[%d:%d] invalid token '%s', expected: '%s'", l, c, p.lit, expected)
+	return fmt.Errorf("[%d:%d] invalid token '%s' determined as %s, expected: '%s'", l, c, p.lit, p.token, expected)
 }
 
 func (p *Parser) debug(ctx context.Context, msg string, params map[string]any) {

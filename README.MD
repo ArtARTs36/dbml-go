@@ -11,6 +11,7 @@ Key different points:
 * Added parsing default value with determine type (string, number, expression)
 * Removed call to `os` package
 * Improved logging
+* Added parsing table settings (headercolor)
 
 ## Installation
 

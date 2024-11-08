@@ -18,15 +18,6 @@ type Project struct {
 	DatabaseType string
 }
 
-// Table ...
-type Table struct {
-	Name    string
-	As      string
-	Note    string
-	Columns []Column
-	Indexes []Index
-}
-
 // Column ...
 type Column struct {
 	Name     string

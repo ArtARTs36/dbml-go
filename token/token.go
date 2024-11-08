@@ -70,6 +70,8 @@ const (
 	INCREMENT
 	DEFAULT
 
+	HEADERCOLOR
+
 	INDEXES
 	TYPE
 	DELETE
@@ -122,15 +124,16 @@ var Tokens = [...]string{
 	AS:         "AS",
 	TABLEGROUP: "TABLEGROUP",
 
-	PRIMARY:   "PRIMARY",
-	KEY:       "KEY",
-	PK:        "PK",
-	NOTE:      "NOTE",
-	UNIQUE:    "UNIQUE",
-	NOT:       "NOT",
-	NULL:      "NULL",
-	INCREMENT: "INCREMENT",
-	DEFAULT:   "DEFAULT",
+	PRIMARY:     "PRIMARY",
+	KEY:         "KEY",
+	PK:          "PK",
+	NOTE:        "NOTE",
+	UNIQUE:      "UNIQUE",
+	NOT:         "NOT",
+	NULL:        "NULL",
+	INCREMENT:   "INCREMENT",
+	DEFAULT:     "DEFAULT",
+	HEADERCOLOR: "HEADERCOLOR",
 
 	INDEXES:  "INDEXES",
 	TYPE:     "TYPE",
