@@ -1,6 +1,7 @@
 package parser
 
 import (
+	"context"
 	"github.com/artarts36/dbml-go/core"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -19,10 +20,8 @@ func p(str string) *Parser {
 
 func TestIllegalSyntax(t *testing.T) {
 	parser := p(`Project test { abc , xyz`)
-	_, err := parser.Parse()
-	if err == nil {
-		t.Fail()
-	}
+	_, err := parser.Parse(context.Background())
+	require.Error(t, err)
 }
 
 func TestParseSimple(t *testing.T) {
@@ -37,7 +36,7 @@ func TestParseSimple(t *testing.T) {
 		
 	}
 	`)
-	dbml, err := parser.Parse()
+	dbml, err := parser.Parse(context.Background())
 	if err != nil {
 		t.Fail()
 	}
@@ -71,7 +70,7 @@ func TestParseTableName(t *testing.T) {
 		id int
 	}
 	`)
-	dbml, err := parser.Parse()
+	dbml, err := parser.Parse(context.Background())
 	if err != nil {
 		t.Fail()
 	}
@@ -87,7 +86,7 @@ func TestParseTableWithType(t *testing.T) {
 		type int
 	}
 	`)
-	dbml, err := parser.Parse()
+	dbml, err := parser.Parse(context.Background())
 	if err != nil {
 		t.Fail()
 	}
@@ -103,7 +102,7 @@ func TestParseTableWithNoteColumn(t *testing.T) {
 		note int
 	}
 	`)
-	dbml, err := parser.Parse()
+	dbml, err := parser.Parse(context.Background())
 
 	// t.Log(err)
 	if err != nil {
@@ -122,7 +121,7 @@ func TestAllowKeywordsAsTable(t *testing.T) {
 		note int
 	}
 	`)
-	dbml, err := parser.Parse()
+	dbml, err := parser.Parse(context.Background())
 
 	// t.Log(err)
 	if err != nil {
@@ -141,7 +140,7 @@ func TestAllowKeywordsAsEnum(t *testing.T) {
 		key
 	}
 	`)
-	dbml, err := parser.Parse()
+	dbml, err := parser.Parse(context.Background())
 
 	// t.Log(err)
 	if err != nil {
@@ -243,7 +242,7 @@ func TestParser_Parse_Column_Settings_Default(t *testing.T) {
 
 	for _, tCase := range cases {
 		t.Run(tCase.Title, func(t *testing.T) {
-			dbml, err := p(tCase.Spec).Parse()
+			dbml, err := p(tCase.Spec).Parse(context.Background())
 			require.NoError(t, err)
 
 			assert.Equal(t, tCase.Expected, dbml.Tables[0].Columns[0].Settings.Default)

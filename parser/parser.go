@@ -1,8 +1,8 @@
 package parser
 
 import (
+	"context"
 	"fmt"
-	"os"
 	"regexp"
 	"strconv"
 	"strings"
@@ -20,21 +20,25 @@ type Parser struct {
 	token token.Token
 	lit   string
 
-	Debug bool
+	logger Logger
 }
 
 // NewParser ...
 func NewParser(s *scanner.Scanner) *Parser {
+	return NewParserWithLogger(s, NoopLogger)
+}
+
+func NewParserWithLogger(s *scanner.Scanner, logger Logger) *Parser {
 	return &Parser{
-		s:     s,
-		token: token.ILLEGAL,
-		lit:   "",
-		Debug: os.Getenv("DBML_PARSER_DEBUG") == "true",
+		s:      s,
+		token:  token.ILLEGAL,
+		lit:    "",
+		logger: logger,
 	}
 }
 
 // Parse ...
-func (p *Parser) Parse() (*core.DBML, error) {
+func (p *Parser) Parse(ctx context.Context) (*core.DBML, error) {
 	dbml := &core.DBML{}
 	for {
 		p.next()
@@ -44,14 +48,14 @@ func (p *Parser) Parse() (*core.DBML, error) {
 			if err != nil {
 				return nil, err
 			}
-			p.debug("project", project)
+			p.debug(ctx, "found project", map[string]any{"project": project})
 			dbml.Project = *project
 		case token.TABLE:
-			table, err := p.parseTable()
+			table, err := p.parseTable(ctx)
 			if err != nil {
 				return nil, err
 			}
-			p.debug("table", table)
+			p.debug(ctx, "found table", map[string]any{"table": table})
 
 			// TODO:
 			// * register table to tables map, for check ref
@@ -62,7 +66,9 @@ func (p *Parser) Parse() (*core.DBML, error) {
 			if err != nil {
 				return nil, err
 			}
-			p.debug("Refs", ref)
+			p.debug(ctx, "found refs", map[string]any{
+				"ref": ref,
+			})
 
 			// TODO:
 			// * Check refs is valid or not (by tables map)
@@ -73,7 +79,9 @@ func (p *Parser) Parse() (*core.DBML, error) {
 			if err != nil {
 				return nil, err
 			}
-			p.debug("Enum", enum)
+			p.debug(ctx, "found enum", map[string]any{
+				"enum": enum,
+			})
 			dbml.Enums = append(dbml.Enums, *enum)
 
 		case token.TABLEGROUP:
@@ -81,12 +89,17 @@ func (p *Parser) Parse() (*core.DBML, error) {
 			if err != nil {
 				return nil, err
 			}
-			p.debug("TableGroup", tableGroup)
+			p.debug(ctx, "found table group", map[string]any{
+				"table_group": tableGroup,
+			})
 			dbml.TableGroups = append(dbml.TableGroups, *tableGroup)
 		case token.EOF:
 			return dbml, nil
 		default:
-			p.debug("token", p.token.String(), "lit", p.lit)
+			p.debug(ctx, "got unexpected token", map[string]any{
+				"token": p.token.String(),
+				"lit":   p.lit,
+			})
 			return nil, p.expect("Project, Ref, Table, Enum, TableGroup")
 		}
 	}
@@ -223,7 +236,7 @@ func (p *Parser) parseRelationship() (*core.Relationship, error) {
 	return rel, nil
 }
 
-func (p *Parser) parseTable() (*core.Table, error) {
+func (p *Parser) parseTable(ctx context.Context) (*core.Table, error) {
 	table := &core.Table{}
 	p.next()
 	switch p.token {
@@ -255,7 +268,7 @@ func (p *Parser) parseTable() (*core.Table, error) {
 		for {
 			switch p.token {
 			case token.INDEXES:
-				indexes, err := p.parseIndexes()
+				indexes, err := p.parseIndexes(ctx)
 				if err != nil {
 					return nil, err
 				}
@@ -274,7 +287,7 @@ func (p *Parser) parseTable() (*core.Table, error) {
 					table.Note = note
 					p.next()
 				} else {
-					column, err := p.parseColumn(columnName)
+					column, err := p.parseColumn(ctx, columnName)
 					if err != nil {
 						return nil, err
 					}
@@ -287,7 +300,7 @@ func (p *Parser) parseTable() (*core.Table, error) {
 	}
 }
 
-func (p *Parser) parseIndexes() ([]core.Index, error) {
+func (p *Parser) parseIndexes(ctx context.Context) ([]core.Index, error) {
 	indexes := []core.Index{}
 
 	p.next()
@@ -306,7 +319,9 @@ func (p *Parser) parseIndexes() ([]core.Index, error) {
 		if err != nil {
 			return nil, err
 		}
-		p.debug("index", index)
+		p.debug(ctx, "found index", map[string]any{
+			"index": index,
+		})
 		indexes = append(indexes, *index)
 	}
 }
@@ -384,7 +399,7 @@ func (p *Parser) parseIndex() (*core.Index, error) {
 	return index, nil
 }
 
-func (p *Parser) parseColumn(name string) (*core.Column, error) {
+func (p *Parser) parseColumn(ctx context.Context, name string) (*core.Column, error) {
 	column := &core.Column{
 		Name: name,
 	}
@@ -421,7 +436,9 @@ func (p *Parser) parseColumn(name string) (*core.Column, error) {
 		column.Settings = *columnSetting
 	}
 
-	p.debug("column", column)
+	p.debug(ctx, "found column", map[string]any{
+		"column": column,
+	})
 	return column, nil
 }
 
@@ -607,11 +624,6 @@ func (p *Parser) expect(expected string) error {
 	return fmt.Errorf("[%d:%d] invalid token '%s', expected: '%s'", l, c, p.lit, expected)
 }
 
-func (p *Parser) debug(args ...interface{}) {
-	if p.Debug {
-		for _, arg := range args {
-			fmt.Printf("%#v\t", arg)
-		}
-		fmt.Println()
-	}
+func (p *Parser) debug(ctx context.Context, msg string, params map[string]any) {
+	p.logger(ctx, msg, params)
 }
