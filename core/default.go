@@ -4,9 +4,10 @@ type ColumnDefaultType int
 
 const (
 	ColumnDefaultTypeUnknown ColumnDefaultType = iota
+	ColumnDefaultTypeNumber
 	ColumnDefaultTypeString
 	ColumnDefaultTypeExpression
-	ColumnDefaultTypeNumber
+	ColumnDefaultTypeBoolean
 )
 
 type ColumnDefault struct {

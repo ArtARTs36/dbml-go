@@ -479,6 +479,19 @@ func (p *Parser) parseColumnDefault() (*core.ColumnDefault, error) {
 		colDef.Type = core.ColumnDefaultTypeNumber
 	case token.EXPR:
 		colDef.Type = core.ColumnDefaultTypeExpression
+	case token.IDENT:
+		if p.lit == "true" {
+			colDef.Type = core.ColumnDefaultTypeBoolean
+			colDef.Value = true
+		} else if p.lit == "false" {
+			colDef.Type = core.ColumnDefaultTypeBoolean
+			colDef.Value = false
+		} else {
+			return nil, p.expect("default value")
+		}
+	case token.NULL:
+		colDef.Type = core.ColumnDefaultTypeBoolean
+		colDef.Value = nil
 	default:
 		return nil, p.expect("default value")
 	}

@@ -238,6 +238,33 @@ func TestParser_Parse_Column_Settings_Default(t *testing.T) {
 				Value: "now()",
 			},
 		},
+		{
+			Title: "parse false value",
+			Spec:  "Table user { name varchar [default: false]}",
+			Expected: core.ColumnDefault{
+				Type:  core.ColumnDefaultTypeBoolean,
+				Raw:   "false",
+				Value: false,
+			},
+		},
+		{
+			Title: "parse true value",
+			Spec:  "Table user { name varchar [default: true]}",
+			Expected: core.ColumnDefault{
+				Type:  core.ColumnDefaultTypeBoolean,
+				Raw:   "true",
+				Value: true,
+			},
+		},
+		{
+			Title: "parse null value",
+			Spec:  "Table user { name varchar [default: null]}",
+			Expected: core.ColumnDefault{
+				Type:  core.ColumnDefaultTypeBoolean,
+				Raw:   "null",
+				Value: nil,
+			},
+		},
 	}
 
 	for _, tCase := range cases {

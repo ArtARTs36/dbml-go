@@ -8,6 +8,7 @@ Key different points:
 * Up min GO version to 1.18
 * Changed default `column.null` value to false
 * Removed model generator
+* Added parsing boolean types (true/false/null)
 * Added parsing default value with determine type (string, number, expression)
 * Removed call to `os` package
 * Improved logging
