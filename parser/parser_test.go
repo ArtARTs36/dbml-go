@@ -134,26 +134,54 @@ func TestAllowKeywordsAsTable(t *testing.T) {
 	}
 }
 
-func TestAllowKeywordsAsEnum(t *testing.T) {
-	parser := p(`
+func TestParser_Parse_Enum(t *testing.T) {
+	cases := []struct {
+		Title    string
+		Spec     string
+		Expected core.Enum
+	}{
+		{
+			Title: "parse simple enum",
+			Spec: `
 	Enum project {
 		key
 	}
-	`)
-	dbml, err := parser.Parse(context.Background())
-
-	// t.Log(err)
-	if err != nil {
-		t.Fatalf("%v", err)
+	`,
+			Expected: core.Enum{
+				Name: "project",
+				Values: []core.EnumValue{
+					{
+						Name: "key",
+					},
+				},
+			},
+		},
+		{
+			Title: "parse double quoted enum value",
+			Spec: `
+	Enum project {
+		"key a b"
+	}
+	`,
+			Expected: core.Enum{
+				Name: "project",
+				Values: []core.EnumValue{
+					{
+						Name: "key a b",
+					},
+				},
+			},
+		},
 	}
 
-	enum := dbml.Enums[0]
-	if enum.Name != "project" {
-		t.Fatalf("enum name should be 'project'")
-	}
+	for _, tCase := range cases {
+		t.Run(tCase.Title, func(t *testing.T) {
+			parser := p(tCase.Spec)
+			got, err := parser.Parse(context.Background())
+			require.NoError(t, err)
 
-	if enum.Values[0].Name != "key" {
-		t.Fatalf("enum value should be 'key'")
+			assert.Equal(t, tCase.Expected, got.Enums[0])
+		})
 	}
 }
 

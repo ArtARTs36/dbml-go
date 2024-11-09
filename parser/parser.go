@@ -128,48 +128,6 @@ func (p *Parser) parseTableGroup() (*core.TableGroup, error) {
 	return tableGroup, nil
 }
 
-func (p *Parser) parseEnum() (*core.Enum, error) {
-	enum := &core.Enum{}
-	p.next()
-	if !token.IsIdent(p.token) && p.token != token.DSTRING {
-		return nil, fmt.Errorf("enum name is invalid: %s", p.lit)
-	}
-	enum.Name = p.lit
-	p.next()
-	if p.token != token.LBRACE {
-		return nil, p.expect("{")
-	}
-	p.next()
-
-	for token.IsIdent(p.token) {
-		enumValue := core.EnumValue{
-			Name: p.lit,
-		}
-		p.next()
-		if p.token == token.LBRACK {
-			// handle [Note: ...]
-			p.next()
-			if p.token == token.NOTE {
-				note, err := p.parseDescription()
-				if err != nil {
-					return nil, p.expect("note: 'string'")
-				}
-				enumValue.Note = note
-				p.next()
-			}
-			if p.token != token.RBRACK {
-				return nil, p.expect("]")
-			}
-			p.next()
-		}
-		enum.Values = append(enum.Values, enumValue)
-	}
-	if p.token != token.RBRACE {
-		return nil, p.expect("}")
-	}
-	return enum, nil
-}
-
 func (p *Parser) parseRefs() (*core.Ref, error) {
 	ref := &core.Ref{}
 	p.next()

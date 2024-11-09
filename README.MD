@@ -13,6 +13,7 @@ Key different points:
 * Removed call to `os` package
 * Improved logging
 * Added parsing table settings (headercolor)
+* Added parsing double quoted enum values
 
 ## Installation
 
